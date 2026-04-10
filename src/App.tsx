@@ -9,7 +9,6 @@ type ScanStatus = 'idle' | 'scanning' | 'thinking' | 'streaming' | 'done' | 'err
 function App() {
   const [status, setStatus] = useState<ScanStatus>('idle')
   const [mode, setMode] = useState<string | null>(null)
-  const [visible, setVisible] = useState(true)
 
   useEffect(() => {
     // Window just appeared — trigger scan
