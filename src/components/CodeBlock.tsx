@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
-import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism'
+import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism'
 
 export function CodeBlock({ language, children }: { language: string, children: React.ReactNode }) {
   const [copied, setCopied] = useState(false)
@@ -13,20 +13,29 @@ export function CodeBlock({ language, children }: { language: string, children: 
   }
 
   return (
-    <div className="relative group my-4 rounded-lg overflow-hidden bg-[#282c34]">
-      <div className="flex items-center justify-between px-4 py-1.5 bg-white/10 text-xs text-white/50">
-        <span>{language}</span>
+    <div className="my-3 rounded-xl overflow-hidden border border-white/8 bg-black/40">
+      <div className="flex items-center justify-between px-3 py-2 border-b border-white/6 bg-white/3">
+        <div className="flex items-center gap-2">
+          <div className="flex gap-1.5">
+            <div className="w-2.5 h-2.5 rounded-full bg-white/10" />
+            <div className="w-2.5 h-2.5 rounded-full bg-white/10" />
+            <div className="w-2.5 h-2.5 rounded-full bg-white/10" />
+          </div>
+          <span className="text-white/30 text-xs" style={{ fontFamily: 'JetBrains Mono, monospace' }}>
+            {language}
+          </span>
+        </div>
         <button
           onClick={handleCopy}
-          className="hover:text-white transition-colors"
+          className="text-xs text-white/30 hover:text-white/70 transition-colors"
         >
-          {copied ? '✓ Copied' : 'Copy'}
+          {copied ? '✓ copied' : 'copy'}
         </button>
       </div>
       <SyntaxHighlighter
         language={language || 'text'}
-        style={oneDark}
-        customStyle={{ margin: 0, padding: '1rem', background: 'transparent' }}
+        style={vscDarkPlus}
+        customStyle={{ margin: 0, padding: '0.75rem 1rem', background: 'transparent', fontSize: '0.72rem' }}
       >
         {code}
       </SyntaxHighlighter>

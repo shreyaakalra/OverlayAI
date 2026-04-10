@@ -71,7 +71,7 @@ async function runScanPipeline() {
     const { mode, context } = await analyzeScreen(base64);
     currentContext = context;
     win.webContents.send('scan-status', 'done');
-    win.webContents.send('scan-context', { mode, context });
+    win.webContents.send('scan-context', { mode, context, thumb: `data:image/png;base64,${base64}` });
 
     // 5. Reset session and stream Groq response
     sessionMessages = [
