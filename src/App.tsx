@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { StatusBar } from './components/StatusBar'
 import { ResultArea } from './components/ResultArea'
 import { FollowUpInput } from './components/FollowUpInput'
@@ -9,17 +9,23 @@ type ScanStatus = 'idle' | 'scanning' | 'thinking' | 'streaming' | 'done' | 'err
 function App() {
   const [status, setStatus] = useState<ScanStatus>('idle')
   const [mode, setMode] = useState<string | null>(null)
+  const [markdown, setMarkdown] = useState<string>('')
+  const hasRegistered = useRef(false)
 
   useEffect(() => {
-    // Window just appeared — trigger scan
+    if (hasRegistered.current) return
+    hasRegistered.current = true
+
     window.api.onTriggerScan(() => {
       setStatus('scanning')
       setMode(null)
+      setMarkdown('')
     })
 
     window.api.onScanStatus((s: string) => {
       if (s === 'scanning') setStatus('scanning')
       if (s === 'done') setStatus('thinking')
+      if (s === 'thinking') setStatus('thinking')
     })
 
     window.api.onScanContext((data: { mode: string; context: string }) => {
@@ -27,8 +33,9 @@ function App() {
       setStatus('streaming')
     })
 
-    window.api.onAiChunk(() => {
+    window.api.onAiChunk((chunk?: string) => {
       setStatus('streaming')
+      if (chunk) setMarkdown(prev => prev + chunk)
     })
 
     window.api.onAiDone(() => {
@@ -38,14 +45,18 @@ function App() {
     window.api.onAiError(() => {
       setStatus('error')
     })
+
+    return () => {
+      window.api.removeAllListeners?.()
+      hasRegistered.current = false
+    }
   }, [])
 
   return (
-    <div className={`w-full h-screen p-4 flex flex-col overlay-enter`}>
-      {/* Frosted glass card */}
+    <div className="w-full h-screen p-4 flex flex-col overlay-enter">
       <div className="flex-1 flex flex-col bg-black/50 backdrop-blur-2xl rounded-2xl border border-white/10 shadow-2xl p-4 overflow-hidden">
         <StatusBar mode={mode} />
-        <ResultArea status={status} />
+        <ResultArea status={status} markdown={markdown} />
         <FollowUpInput disabled={status === 'scanning' || status === 'thinking'} />
       </div>
     </div>

@@ -8,15 +8,13 @@ declare global {
       onResult: (cb: (data: unknown) => void) => void;
       copyText: (text: string) => void;
       retry: () => void;
-      
-      // --- NEW PHASE 2/3 EVENT LISTENERS ---
       onScanStatus: (cb: (s: string) => void) => void;
       onScanContext: (cb: (data: { mode: string; context: string }) => void) => void;
-      onAiChunk: (cb: (chunk?: string) => void) => void; // Optional chunk if you need it later
+      onAiChunk: (cb: (chunk?: string) => void) => void;
       onAiDone: (cb: () => void) => void;
       onAiError: (cb: (err?: unknown) => void) => void;
+      removeAllListeners: () => void;
     };
   }
 }
-
 export {};

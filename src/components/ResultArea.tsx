@@ -1,9 +1,28 @@
+import ReactMarkdown from 'react-markdown'
+import type { Components } from 'react-markdown'
+import { CodeBlock } from './CodeBlock'
+
 interface ResultAreaProps {
   status: 'idle' | 'scanning' | 'thinking' | 'streaming' | 'done' | 'error'
+  markdown?: string
 }
 
-export function ResultArea({ status }: ResultAreaProps) {
+const markdownComponents: Components = {
+  code({ className, children, ...props }) {
+    const match = /language-(\w+)/.exec(className || '')
+    const isInline = !match
 
+    return isInline ? (
+      <code className="bg-white/10 px-1.5 py-0.5 rounded text-white/90" {...props}>
+        {children}
+      </code>
+    ) : (
+      <CodeBlock language={match[1]}>{children}</CodeBlock>
+    )
+  }
+}
+
+export function ResultArea({ status, markdown }: ResultAreaProps) {
   if (status === 'idle') {
     return (
       <div className="flex-1 flex flex-col items-center justify-center gap-3 text-center">
@@ -47,10 +66,21 @@ export function ResultArea({ status }: ResultAreaProps) {
     )
   }
 
-  // streaming / thinking / done — Phase 3 fills this in
+  if (status === 'thinking' && !markdown) {
+    return (
+      <div className="flex-1 flex items-center justify-center">
+        <div className="text-white/20 text-sm animate-pulse">Connecting to AI...</div>
+      </div>
+    )
+  }
+
   return (
-    <div className="flex-1 flex items-center justify-center">
-      <div className="text-white/20 text-sm animate-pulse">Connecting to AI...</div>
+    <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
+      <div className="prose prose-invert prose-sm max-w-none text-white/80">
+        <ReactMarkdown components={markdownComponents}>
+          {markdown}
+        </ReactMarkdown>
+      </div>
     </div>
   )
 }

@@ -7,9 +7,12 @@ contextBridge.exposeInMainWorld('api', {
   onAiDone: (cb) => ipcRenderer.on('ai-done', (_, full) => cb(full)),
   onAiError: (cb) => ipcRenderer.on('ai-error', (_, err) => cb(err)),
   onTriggerScan: (cb) => ipcRenderer.on('trigger-scan', () => cb()),
-
   sendFollowUp: (msg) => ipcRenderer.send('follow-up', msg),
   copyText: (text) => ipcRenderer.send('copy-text', text),
   retry: () => ipcRenderer.send('retry'),
   hide: () => ipcRenderer.send('hide-window'),
+  removeAllListeners: () => {
+    ['scan-status', 'scan-context', 'ai-chunk', 'ai-done', 'ai-error', 'trigger-scan']
+      .forEach(ch => ipcRenderer.removeAllListeners(ch))
+  },
 })

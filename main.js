@@ -1,10 +1,21 @@
-import { app, BrowserWindow, globalShortcut, ipcMain, clipboard } from 'electron'
-import { fileURLToPath } from 'url'
-import path from 'path'
+import { app, BrowserWindow, globalShortcut, ipcMain, clipboard } from 'electron';
+import { fileURLToPath } from 'url';
+import path from 'path';
+import { execSync } from 'child_process';
+import fs from 'fs';
+import os from 'os';
+import dotenv from 'dotenv';
+import { analyzeScreen } from './vision.js';
+import { streamResponse, SYSTEM_PROMPT } from './groq.js';
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
+dotenv.config();
 
-let win = null
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+let win = null;
+let sessionMessages = [];
+let currentContext = '';
+let isScanning = false;
 
 function createWindow() {
   win = new BrowserWindow({
@@ -23,68 +34,118 @@ function createWindow() {
       contextIsolation: true,
       nodeIntegration: false,
     }
-  })
+  });
 
-  // In dev, load from Vite dev server
-  win.loadURL('http://localhost:5173')
+  win.loadURL('http://localhost:5173');
+  win.hide();
+}
 
-  // Start hidden
-  win.hide()
+function captureScreen() {
+  const tmpPath = path.join(os.tmpdir(), 'overlay-snap.png');
+  execSync(`screencapture -x -t png "${tmpPath}"`);
+  const buffer = fs.readFileSync(tmpPath);
+  fs.unlinkSync(tmpPath);
+  return buffer.toString('base64');
+}
 
-  // Uncomment this during development to see DevTools
-  // win.webContents.openDevTools({ mode: 'detach' })
+async function runScanPipeline() {
+  if (!win || isScanning) return;
+  isScanning = true;
+
+  try {
+    // 1. Hide window so it doesn't appear in screenshot
+    win.hide();
+    await new Promise(r => setTimeout(r, 250));
+
+    // 2. Capture screen
+    const base64 = captureScreen();
+
+    // 3. Show window and tell React to reset UI
+    win.center();
+    win.show();
+    win.focus();
+    win.webContents.send('trigger-scan');
+    win.webContents.send('scan-status', 'scanning');
+
+    // 4. Analyze with Gemini
+    const { mode, context } = await analyzeScreen(base64);
+    currentContext = context;
+    win.webContents.send('scan-status', 'done');
+    win.webContents.send('scan-context', { mode, context });
+
+    // 5. Reset session and stream Groq response
+    sessionMessages = [
+      { role: 'system', content: SYSTEM_PROMPT },
+      { role: 'user', content: `Screen context:\n${currentContext}\n\nAnalyze this and help me.` }
+    ];
+
+    await streamResponse(
+      sessionMessages,
+      (chunk) => win.webContents.send('ai-chunk', chunk),
+      (full) => {
+        sessionMessages.push({ role: 'assistant', content: full });
+        win.webContents.send('ai-done');
+      }
+    );
+  } catch (error) {
+    console.error('Vision Pipeline Error:', error);
+    if (win) {
+      win.show();
+      win.webContents.send('ai-error');
+    }
+  } finally {
+    isScanning = false;
+  }
 }
 
 app.whenReady().then(() => {
-  createWindow()
+  createWindow();
 
-  // Register the global hotkey
-  const registered = globalShortcut.register('CommandOrControl+Shift+Space', () => {
-    if (!win) return
+  const registered = globalShortcut.register('CommandOrControl+Shift+Space', async () => {
+    if (!win) return;
 
     if (win.isVisible()) {
-      win.hide()
+      // Already open — re-scan instead of hiding
+      runScanPipeline();
     } else {
-      win.center()
-      win.show()
-      win.focus()
-      // Tell React to start scanning
-      win.webContents.send('trigger-scan')
+      runScanPipeline();
     }
-  })
+  });
 
   if (!registered) {
-    console.error('❌ Global shortcut registration failed')
+    console.error('❌ Global shortcut registration failed');
   } else {
-    console.log('✅ Hotkey Cmd+Shift+Space registered')
+    console.log('✅ Hotkey Cmd+Shift+Space registered');
   }
-})
+});
 
 // IPC Handlers
-ipcMain.on('hide-window', () => {
-  win?.hide()
-})
+ipcMain.on('hide-window', () => win?.hide());
+ipcMain.on('copy-text', (_, text) => clipboard.writeText(text));
+ipcMain.on('retry', () => runScanPipeline());
 
-ipcMain.on('copy-text', (_, text) => {
-  clipboard.writeText(text)
-})
+ipcMain.on('follow-up', async (_, message) => {
+  if (!win || isScanning) return;
+  isScanning = true;
 
-ipcMain.on('follow-up', (_, message) => {
-  console.log('Follow-up received:', message)
-  // Phase 3 will handle this — placeholder for now
-})
+  win.webContents.send('scan-status', 'thinking');
+  sessionMessages.push({ role: 'user', content: message });
 
-ipcMain.on('retry', () => {
-  console.log('Retry triggered')
-  // Phase 3 will handle this
-})
+  try {
+    await streamResponse(
+      sessionMessages,
+      (chunk) => win.webContents.send('ai-chunk', chunk),
+      (full) => {
+        sessionMessages.push({ role: 'assistant', content: full });
+        win.webContents.send('ai-done');
+      }
+    );
+  } catch {
+    win.webContents.send('ai-error');
+  } finally {
+    isScanning = false;
+  }
+});
 
-// Cleanup
-app.on('will-quit', () => {
-  globalShortcut.unregisterAll()
-})
-
-// Keep app alive when window is closed (macOS)
-app.on('window-all-closed', (e) => {
-  e.preventDefault()
-})
+app.on('will-quit', () => globalShortcut.unregisterAll());
+app.on('window-all-closed', (e) => e.preventDefault());
