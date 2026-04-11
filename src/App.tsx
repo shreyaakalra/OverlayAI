@@ -52,20 +52,23 @@ function App() {
   }, [])
 
   return (
-    <div className="w-full h-screen p-3 flex flex-col overlay-enter">
-      <div className="flex-1 flex flex-col rounded-2xl overflow-hidden p-4"
-        style={{
-          background: 'rgba(10, 12, 16, 0.92)',
-          backdropFilter: 'blur(24px)',
-          border: '1px solid rgba(255,255,255,0.08)',
-          boxShadow: '0 32px 64px rgba(0,0,0,0.6), 0 0 0 0.5px rgba(255,255,255,0.05)'
-        }}>
-        <StatusBar mode={mode} scanCount={scanCount} />
-        <ResultArea status={status} markdown={markdown} screenshotThumb={screenshotThumb} />
-        <FollowUpInput disabled={status === 'scanning' || status === 'thinking'} />
-      </div>
+  <div className="w-full h-screen p-3 flex flex-col overlay-enter">
+    <div
+      className="flex-1 flex flex-col rounded-2xl overflow-hidden p-4"
+      style={{
+        background: 'rgba(9, 11, 17, 0.88)',
+        backdropFilter: 'blur(28px) saturate(180%)',
+        WebkitBackdropFilter: 'blur(28px) saturate(180%)',
+        border: '1px solid rgba(255,255,255,0.07)',
+        boxShadow: '0 32px 80px rgba(0,0,0,0.7), 0 0 0 0.5px rgba(255,255,255,0.04), inset 0 1px 0 rgba(255,255,255,0.05)'
+      }}
+    >
+      <StatusBar mode={mode} scanCount={scanCount} />
+      <ResultArea status={status} markdown={markdown} screenshotThumb={screenshotThumb} />
+      <FollowUpInput disabled={status === 'scanning' || status === 'thinking'} />
     </div>
-  )
+  </div>
+)
 }
 
 export default App
