@@ -2,7 +2,6 @@ import { app, BrowserWindow, globalShortcut, desktopCapturer, ipcMain } from 'el
 import path from 'path'
 
 let win: BrowserWindow | null = null
-
 const isDev = !app.isPackaged
 
 function createWindow() {
@@ -26,15 +25,10 @@ function createWindow() {
 
   if (isDev) {
     win.loadURL('http://localhost:5173')
-    // DevTools removed so ESC works properly
   } else {
     win.loadFile(path.join(__dirname, '../dist/index.html'))
   }
 
-  win.center()
-  win.show()
-
-  // ESC at Electron level
   win.webContents.on('before-input-event', (event, input) => {
     if (input.key === 'Escape') {
       win?.hide()
@@ -42,10 +36,29 @@ function createWindow() {
     }
   })
 
-  // Hide when window loses focus
   win.on('blur', () => {
     win?.hide()
   })
+}
+
+async function captureAndShow() {
+  if (!win) return
+
+  // Capture BEFORE showing the window
+  const sources = await desktopCapturer.getSources({
+    types: ['screen'],
+    thumbnailSize: { width: 1280, height: 720 },
+  })
+  const screenshot = sources[0].thumbnail.toDataURL()
+
+  win.center()
+  win.show()
+  win.focus()
+
+  // Send screenshot to renderer after a short delay so React has mounted
+  setTimeout(() => {
+    win?.webContents.send('auto-scan', screenshot)
+  }, 300)
 }
 
 app.whenReady().then(() => {
@@ -56,9 +69,7 @@ app.whenReady().then(() => {
     if (win.isVisible()) {
       win.hide()
     } else {
-      win.center()
-      win.show()
-      win.focus()
+      captureAndShow()
     }
   })
 })
@@ -69,14 +80,6 @@ app.on('will-quit', () => {
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit()
-})
-
-ipcMain.handle('capture-screen', async () => {
-  const sources = await desktopCapturer.getSources({
-    types: ['screen'],
-    thumbnailSize: { width: 1280, height: 720 },
-  })
-  return sources[0].thumbnail.toDataURL()
 })
 
 ipcMain.on('hide-window', () => {

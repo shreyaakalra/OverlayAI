@@ -1,41 +1,44 @@
 import { useState } from 'react'
 
 const SYSTEM_PROMPT = `You are an expert AI assistant embedded in a screen overlay.
-You receive the user's current screen context and help them.
+You receive the user's current screen screenshot and help them.
 Rules:
-- If context is CODE: find bugs, explain what it does, suggest improvements. Use code blocks.
-- If context is EMAIL/SLACK: offer to rewrite, summarize, or draft a reply.
-- If context is DOCUMENT: summarize key points, answer questions about it.
-- Be concise. The UI is small. Lead with the most useful thing first.
-- Use markdown. Headers, bullets, and code blocks render correctly.
-- You CAN see the user's screen via the screenshot provided. Always acknowledge what you see.`
+- Always start by briefly describing what you see on screen (1 sentence).
+- Then provide the most useful insight or summary.
+- If it's CODE: find bugs, explain it, suggest improvements.
+- If it's EMAIL/BROWSER: summarize, offer to draft replies.
+- If it's DOCUMENT: summarize key points.
+- Be concise. The UI is small.
+- Use markdown. Headers, bullets, and code blocks render correctly.`
+
+export type Message = { role: 'user' | 'assistant'; content: string }
 
 export function useCerebras() {
   const [response, setResponse] = useState('')
   const [loading, setLoading] = useState(false)
+  const [history, setHistory] = useState<Message[]>([])
 
   async function ask(prompt: string, screenshotBase64?: string) {
     setLoading(true)
     setResponse('')
 
-    const messages: any[] = [
+    const userMessage: any = screenshotBase64
+      ? {
+          role: 'user',
+          content: [
+            { type: 'image_url', image_url: { url: screenshotBase64 } },
+            { type: 'text', text: prompt },
+          ],
+        }
+      : { role: 'user', content: prompt }
+
+    const messages = [
       { role: 'system', content: SYSTEM_PROMPT },
-      {
-        role: 'user',
-        content: screenshotBase64
-          ? [
-              {
-                type: 'image_url',
-                image_url: { url: screenshotBase64 },
-              },
-              {
-                type: 'text',
-                text: prompt,
-              },
-            ]
-          : prompt,
-      },
+      ...history.map((m) => ({ role: m.role, content: m.content })),
+      userMessage,
     ]
+
+    let fullResponse = ''
 
     try {
       const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
@@ -68,10 +71,20 @@ export function useCerebras() {
           if (data === '[DONE]') break
           try {
             const delta = JSON.parse(data).choices[0].delta.content
-            if (delta) setResponse((prev) => prev + delta)
+            if (delta) {
+              fullResponse += delta
+              setResponse((prev) => prev + delta)
+            }
           } catch {}
         }
       }
+
+      // Save to history (store as text only for follow-ups)
+      setHistory((prev) => [
+        ...prev,
+        { role: 'user', content: prompt },
+        { role: 'assistant', content: fullResponse },
+      ])
     } catch (err) {
       setResponse('Something went wrong. Please try again.')
     }
@@ -79,5 +92,10 @@ export function useCerebras() {
     setLoading(false)
   }
 
-  return { ask, response, loading }
+  function reset() {
+    setHistory([])
+    setResponse('')
+  }
+
+  return { ask, response, loading, history, reset }
 }

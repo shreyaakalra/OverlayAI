@@ -1,6 +1,6 @@
 "use strict";
 const electron = require("electron");
 electron.contextBridge.exposeInMainWorld("overlayAPI", {
-  captureScreen: () => electron.ipcRenderer.invoke("capture-screen"),
-  hide: () => electron.ipcRenderer.send("hide-window")
+  hide: () => electron.ipcRenderer.send("hide-window"),
+  onScan: (callback) => electron.ipcRenderer.on("auto-scan", (_event, screenshot) => callback(screenshot))
 });

@@ -26,8 +26,6 @@ function createWindow() {
   } else {
     win.loadFile(path.join(__dirname, "../dist/index.html"));
   }
-  win.center();
-  win.show();
   win.webContents.on("before-input-event", (event, input) => {
     if (input.key === "Escape") {
       win == null ? void 0 : win.hide();
@@ -38,6 +36,20 @@ function createWindow() {
     win == null ? void 0 : win.hide();
   });
 }
+async function captureAndShow() {
+  if (!win) return;
+  const sources = await electron.desktopCapturer.getSources({
+    types: ["screen"],
+    thumbnailSize: { width: 1280, height: 720 }
+  });
+  const screenshot = sources[0].thumbnail.toDataURL();
+  win.center();
+  win.show();
+  win.focus();
+  setTimeout(() => {
+    win == null ? void 0 : win.webContents.send("auto-scan", screenshot);
+  }, 300);
+}
 electron.app.whenReady().then(() => {
   createWindow();
   electron.globalShortcut.register("CommandOrControl+Shift+Space", () => {
@@ -45,9 +57,7 @@ electron.app.whenReady().then(() => {
     if (win.isVisible()) {
       win.hide();
     } else {
-      win.center();
-      win.show();
-      win.focus();
+      captureAndShow();
     }
   });
 });
@@ -56,13 +66,6 @@ electron.app.on("will-quit", () => {
 });
 electron.app.on("window-all-closed", () => {
   if (process.platform !== "darwin") electron.app.quit();
-});
-electron.ipcMain.handle("capture-screen", async () => {
-  const sources = await electron.desktopCapturer.getSources({
-    types: ["screen"],
-    thumbnailSize: { width: 1280, height: 720 }
-  });
-  return sources[0].thumbnail.toDataURL();
 });
 electron.ipcMain.on("hide-window", () => {
   if (win) {
