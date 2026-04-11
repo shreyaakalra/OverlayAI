@@ -7,36 +7,22 @@ export function CodeBlock({ language, children }: { language: string; children: 
   const code = String(children).replace(/\n$/, '')
 
   return (
-    <div className="my-4 rounded-lg overflow-hidden border border-white/10 bg-[#1E1E1E] shadow-lg">
-      {/* Header */}
-      <div className="flex items-center justify-between px-4 py-2 bg-black/40 border-b border-white/5">
-        <div className="flex items-center gap-3">
-          {/* Mac window dots */}
-          <div className="flex gap-1.5">
-            <div className="w-2.5 h-2.5 rounded-full bg-red-500/80" />
-            <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/80" />
-            <div className="w-2.5 h-2.5 rounded-full bg-green-500/80" />
-          </div>
-          <span className="text-white/40 text-xs font-mono">{language || 'text'}</span>
-        </div>
+    <div className="my-2 rounded-[10px] overflow-hidden border border-white/[0.07]">
+      <div className="flex items-center justify-between px-3 py-2 bg-white/[0.03] border-b border-white/[0.05]">
+        <span className="font-mono text-[10px] tracking-[0.08em] text-white/30">{language || 'text'}</span>
         <button
-          onClick={() => {
-            window.api.copyText(code)
-            setCopied(true)
-            setTimeout(() => setCopied(false), 2000)
-          }}
-          className={`text-xs px-2 py-1 rounded-md transition-colors ${
-            copied ? 'text-emerald-400 bg-emerald-400/10' : 'text-white/40 hover:text-white hover:bg-white/10'
+          onClick={() => { window.api.copyText(code); setCopied(true); setTimeout(() => setCopied(false), 1800) }}
+          className={`font-mono text-[10px] px-1.5 py-0.5 rounded transition-colors ${
+            copied ? 'text-emerald-400' : 'text-white/30 hover:text-white/70 hover:bg-white/[0.05]'
           }`}
         >
-          {copied ? 'Copied!' : 'Copy'}
+          {copied ? 'Copied' : 'Copy'}
         </button>
       </div>
-      {/* Body */}
       <SyntaxHighlighter
         language={language || 'text'}
         style={vscDarkPlus}
-        customStyle={{ margin: 0, padding: '1rem', background: 'transparent', fontSize: '13px' }}
+        customStyle={{ margin: 0, padding: '12px', background: 'rgba(0,0,0,0.3)', fontSize: '12px' }}
       >
         {code}
       </SyntaxHighlighter>
