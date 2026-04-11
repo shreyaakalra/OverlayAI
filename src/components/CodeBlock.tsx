@@ -2,40 +2,27 @@ import { useState } from 'react'
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism'
 
-export function CodeBlock({ language, children }: { language: string, children: React.ReactNode }) {
+export function CodeBlock({ language, children }: { language: string; children: React.ReactNode }) {
   const [copied, setCopied] = useState(false)
   const code = String(children).replace(/\n$/, '')
 
-  const handleCopy = () => {
-    window.api.copyText(code)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
-  }
-
   return (
-    <div className="my-3 rounded-xl overflow-hidden border border-white/8 bg-black/40">
-      <div className="flex items-center justify-between px-3 py-2 border-b border-white/6 bg-white/3">
-        <div className="flex items-center gap-2">
-          <div className="flex gap-1.5">
-            <div className="w-2.5 h-2.5 rounded-full bg-white/10" />
-            <div className="w-2.5 h-2.5 rounded-full bg-white/10" />
-            <div className="w-2.5 h-2.5 rounded-full bg-white/10" />
-          </div>
-          <span className="text-white/30 text-xs" style={{ fontFamily: 'JetBrains Mono, monospace' }}>
-            {language}
-          </span>
-        </div>
+    <div className="my-2 rounded-[10px] overflow-hidden border border-white/[0.07]">
+      <div className="flex items-center justify-between px-3 py-2 bg-white/[0.03] border-b border-white/[0.05]">
+        <span className="font-mono text-[10px] tracking-[0.08em] text-white/30">{language || 'text'}</span>
         <button
-          onClick={handleCopy}
-          className="text-xs text-white/30 hover:text-white/70 transition-colors"
+          onClick={() => { window.api.copyText(code); setCopied(true); setTimeout(() => setCopied(false), 1800) }}
+          className={`font-mono text-[10px] px-1.5 py-0.5 rounded transition-colors ${
+            copied ? 'text-emerald-400' : 'text-white/30 hover:text-white/70 hover:bg-white/[0.05]'
+          }`}
         >
-          {copied ? '✓ copied' : 'copy'}
+          {copied ? 'Copied' : 'Copy'}
         </button>
       </div>
       <SyntaxHighlighter
         language={language || 'text'}
         style={vscDarkPlus}
-        customStyle={{ margin: 0, padding: '0.75rem 1rem', background: 'transparent', fontSize: '0.72rem' }}
+        customStyle={{ margin: 0, padding: '12px', background: 'rgba(0,0,0,0.3)', fontSize: '12px' }}
       >
         {code}
       </SyntaxHighlighter>
