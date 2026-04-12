@@ -118,7 +118,7 @@ export function InstallationPage() {
               No installer needed.
             </p>
             <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' as const, marginTop: '2rem' }}>
-              <a href="#" className="dl-btn">⬇ Download for Mac</a>
+              <a href="https://github.com/shreyaakalra/OverlayAI/releases/download/v0.0.1/desktop-0.0.1-arm64.dmg" className="dl-btn">⬇ Download for Mac</a>
               <a href="#" className="dl-btn" style={{ background: 'var(--green-2)', color: 'var(--green)', border: '1px solid var(--border-hi)', boxShadow: 'none' }}>
                 ⬇ Download for Windows
               </a>

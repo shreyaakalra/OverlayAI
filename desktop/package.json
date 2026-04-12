@@ -1,5 +1,6 @@
 {
   "name": "desktop",
+  "productName": "OverlayAI",
   "private": true,
   "version": "0.0.1",
   "main": "dist-electron/main.js",
@@ -7,6 +8,20 @@
     "dev": "concurrently \"vite\" \"electronmon .\"",
     "build": "tsc && vite build && electron-builder",
     "preview": "vite preview"
+  },
+  "build": {
+    "appId": "com.overlayai.app",
+    "productName": "OverlayAI",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "dist/**/*",
+      "dist-electron/**/*"
+    ],
+    "mac": {
+      "target": "dmg"
+    }
   },
   "dependencies": {
     "react": "^18.2.0",

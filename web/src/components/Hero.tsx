@@ -22,7 +22,7 @@ export function Hero() {
         </p>
 
         <div className="hero-actions">
-          <a href="#" className="dl-btn" id="download">
+          <a href="https://github.com/shreyaakalra/OverlayAI/releases/download/v0.0.1/desktop-0.0.1-arm64.dmg" className="dl-btn" id="download">
             ⬇ Download for Mac
           </a>
         <a href="#" className="dl-btn mt-3 block">

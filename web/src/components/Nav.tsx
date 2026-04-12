@@ -46,7 +46,7 @@ export function Nav({ onToggleTheme, theme, currentPage, onNavigate }: NavProps)
           {theme === 'dark' ? '☀️' : '🌙'}
         </button>
         <a
-          href="#"
+          href="https://github.com/shreyaakalra/OverlayAI/releases/download/v0.0.1/desktop-0.0.1-arm64.dmg"
           className="nav-cta"
           onClick={(e) => { e.preventDefault(); onNavigate('installation') }}
         >
