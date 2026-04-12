@@ -586,7 +586,7 @@ footer {
 .detail-p code {
   font-family: var(--font-mono); font-size: 0.8rem;
   background: var(--green-2); border: 1px solid var(--border);
-  padding: 1px 6px; border-radius: 4px; color: var(--green);
+  padding: 1px 6px; border-radius: 4px; color: var(--white);
 }
 .detail-code {
   background: #000; border: 1px solid var(--border);

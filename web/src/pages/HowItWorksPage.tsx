@@ -1,3 +1,34 @@
+import { motion } from 'framer-motion'
+
+/* ── Variants ─────────────────────────────────────────────────────────────── */
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 24 },
+  show:   {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.55, ease: [0.16, 1, 0.3, 1] as const },
+  },
+}
+
+const fadeUpItem = {
+  hidden: { opacity: 0, y: 24 },
+  show:   (i: number) => ({
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] as const, delay: i * 0.07 },
+  }),
+}
+
+const stagger = {
+  hidden: {},
+  show:   { transition: { staggerChildren: 0.07 } },
+}
+
+const vp = { once: true }
+
+/* ── Component ────────────────────────────────────────────────────────────── */
+
 export function HowItWorksPage() {
   return (
     <main className="page">
@@ -5,25 +36,48 @@ export function HowItWorksPage() {
       {/* ── PAGE HERO ── */}
       <section className="page-hero">
         <div className="page-hero-inner">
-          <div className="s-label">Deep Dive</div>
-          <h1 className="page-title">
+          <motion.div
+            className="s-label"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+          >
+            Deep Dive
+          </motion.div>
+
+          <motion.h1
+            className="page-title"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.08, ease: [0.16, 1, 0.3, 1] }}
+          >
             HOW IT<br /><span className="hl-green">WORKS.</span>
-          </h1>
-          <p className="page-subtitle">
+          </motion.h1>
+
+          <motion.p
+            className="page-subtitle"
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.55, delay: 0.18 }}
+          >
             OverlayAI is a two-model AI pipeline living inside an Electron shell.
             From keypress to streamed response in under 2 seconds — here's exactly what happens.
-          </p>
+          </motion.p>
         </div>
       </section>
 
       {/* ── PIPELINE OVERVIEW ── */}
       <section className="hiw-section">
-        <div className="s-label">The pipeline</div>
-        <h2 className="sh">ONE HOTKEY.<br /><span>FOUR STAGES.</span></h2>
+        <motion.div className="s-label" variants={fadeUp} initial="hidden" whileInView="show" viewport={vp}>
+          The pipeline
+        </motion.div>
+        <motion.h2 className="sh" variants={fadeUp} initial="hidden" whileInView="show" viewport={vp}>
+          ONE HOTKEY.<br /><span>FOUR STAGES.</span>
+        </motion.h2>
 
-        <div className="pipeline">
+        <motion.div className="pipeline" variants={stagger} initial="hidden" whileInView="show" viewport={vp}>
           {pipeline.map((stage, i) => (
-            <div key={i} className="pipeline-stage reveal">
+            <motion.div key={i} className="pipeline-stage" custom={i} variants={fadeUpItem}>
               <div className="pipeline-num">{String(i + 1).padStart(2, '0')}</div>
               <div className="pipeline-icon">{stage.icon}</div>
               <div className="pipeline-body">
@@ -32,17 +86,22 @@ export function HowItWorksPage() {
                 <div className="pipeline-desc">{stage.desc}</div>
               </div>
               {i < pipeline.length - 1 && <div className="pipeline-arrow">→</div>}
-            </div>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       </section>
 
-      {/* ── STAGE DEEP DIVES ── */}
+      {/* ── STAGE 1: HOTKEY ── */}
       <section className="hiw-section alt-bg">
-        <div className="s-label">Stage 1</div>
-        <h2 className="sh">THE <span>HOTKEY.</span></h2>
+        <motion.div className="s-label" variants={fadeUp} initial="hidden" whileInView="show" viewport={vp}>
+          Stage 1
+        </motion.div>
+        <motion.h2 className="sh" variants={fadeUp} initial="hidden" whileInView="show" viewport={vp}>
+          THE <span>HOTKEY.</span>
+        </motion.h2>
+
         <div className="detail-grid">
-          <div className="detail-text reveal">
+          <motion.div className="detail-text" variants={fadeUp} initial="hidden" whileInView="show" viewport={vp}>
             <p className="detail-p">
               OverlayAI registers a <strong>global system hotkey</strong> — <kbd>⌘ ⇧ Space</kbd> — using
               Electron's <code>globalShortcut</code> API. This means it intercepts the keypress
@@ -65,8 +124,9 @@ export function HowItWorksPage() {
   overlayWindow.webContents.send('trigger-capture')
 })`}</pre>
             </div>
-          </div>
-          <div className="detail-visual reveal">
+          </motion.div>
+
+          <motion.div variants={fadeUp} initial="hidden" whileInView="show" viewport={vp}>
             <div className="visual-card">
               <div className="vc-header">
                 <div className="vc-dot" /><span>System Event</span>
@@ -77,15 +137,33 @@ export function HowItWorksPage() {
               <div className="vc-row"><span className="vc-label">Latency</span><span className="vc-val green">&lt; 5ms</span></div>
               <div className="vc-row"><span className="vc-label">Works in</span><span className="vc-val">Any app</span></div>
             </div>
-          </div>
+            <div className="mock-overlay" style={{ marginTop: '1rem' }}>
+              <div className="mo-bar">
+                <div className="mo-dot" /><span className="mo-title">OverlayAI</span>
+                <span className="mo-key">⌘ ⇧ Space</span>
+              </div>
+              <div className="mo-log">
+                <div className="mo-log-line"><span className="mo-dim">t=0ms   </span> keydown intercepted at OS level</div>
+                <div className="mo-log-line"><span className="mo-dim">t=2ms   </span> <span className="mo-green">overlayWindow.show()</span></div>
+                <div className="mo-log-line"><span className="mo-dim">t=3ms   </span> trigger-capture sent via IPC</div>
+                <div className="mo-log-line"><span className="mo-dim">t=4ms   </span> <span className="mo-green">✓ overlay visible</span></div>
+              </div>
+            </div>
+          </motion.div>
         </div>
       </section>
 
+      {/* ── STAGE 2: SCREEN CAPTURE ── */}
       <section className="hiw-section">
-        <div className="s-label">Stage 2</div>
-        <h2 className="sh">SCREEN <span>CAPTURE.</span></h2>
+        <motion.div className="s-label" variants={fadeUp} initial="hidden" whileInView="show" viewport={vp}>
+          Stage 2
+        </motion.div>
+        <motion.h2 className="sh" variants={fadeUp} initial="hidden" whileInView="show" viewport={vp}>
+          SCREEN <span>CAPTURE.</span>
+        </motion.h2>
+
         <div className="detail-grid">
-          <div className="detail-text reveal">
+          <motion.div className="detail-text" variants={fadeUp} initial="hidden" whileInView="show" viewport={vp}>
             <p className="detail-p">
               Electron's <code>desktopCapturer</code> API grabs a screenshot of your entire
               screen the instant the hotkey fires. This is a native OS screenshot — it captures
@@ -109,8 +187,9 @@ export function HowItWorksPage() {
 })
 const base64 = sources[0].thumbnail.toDataURL()`}</pre>
             </div>
-          </div>
-          <div className="detail-visual reveal">
+          </motion.div>
+
+          <motion.div variants={fadeUp} initial="hidden" whileInView="show" viewport={vp}>
             <div className="visual-card">
               <div className="vc-header">
                 <div className="vc-dot" /><span>Screen Capture</span>
@@ -121,15 +200,33 @@ const base64 = sources[0].thumbnail.toDataURL()`}</pre>
               <div className="vc-row"><span className="vc-label">Disk write</span><span className="vc-val green">Never</span></div>
               <div className="vc-row"><span className="vc-label">Latency</span><span className="vc-val green">~100ms</span></div>
             </div>
-          </div>
+            <div className="mock-overlay" style={{ marginTop: '1rem' }}>
+              <div className="mo-bar">
+                <div className="mo-dot" /><span className="mo-title">Capture</span>
+                <span className="mo-key">in memory</span>
+              </div>
+              <div className="mo-log">
+                <div className="mo-log-line"><span className="mo-dim">t=5ms   </span> desktopCapturer.getSources()</div>
+                <div className="mo-log-line"><span className="mo-dim">t=88ms  </span> <span className="mo-green">raw buffer received</span></div>
+                <div className="mo-log-line"><span className="mo-dim">t=102ms </span> base64 encoded · 1.4MB</div>
+                <div className="mo-log-line"><span className="mo-dim">t=103ms </span> <span className="mo-green">✓ ready to send</span></div>
+              </div>
+            </div>
+          </motion.div>
         </div>
       </section>
 
+      {/* ── STAGE 3: VISION MODEL ── */}
       <section className="hiw-section alt-bg">
-        <div className="s-label">Stage 3</div>
-        <h2 className="sh">VISION <span>MODEL.</span></h2>
+        <motion.div className="s-label" variants={fadeUp} initial="hidden" whileInView="show" viewport={vp}>
+          Stage 3
+        </motion.div>
+        <motion.h2 className="sh" variants={fadeUp} initial="hidden" whileInView="show" viewport={vp}>
+          VISION <span>MODEL.</span>
+        </motion.h2>
+
         <div className="detail-grid">
-          <div className="detail-text reveal">
+          <motion.div className="detail-text" variants={fadeUp} initial="hidden" whileInView="show" viewport={vp}>
             <p className="detail-p">
               The base64 screenshot is sent to <strong>Llama 3.2 Vision</strong> running on
               Groq's inference infrastructure. Groq uses custom LPU (Language Processing Unit)
@@ -159,8 +256,9 @@ const base64 = sources[0].thumbnail.toDataURL()`}</pre>
   }]
 })`}</pre>
             </div>
-          </div>
-          <div className="detail-visual reveal">
+          </motion.div>
+
+          <motion.div variants={fadeUp} initial="hidden" whileInView="show" viewport={vp}>
             <div className="visual-card">
               <div className="vc-header">
                 <div className="vc-dot" /><span>Vision Model</span>
@@ -171,15 +269,39 @@ const base64 = sources[0].thumbnail.toDataURL()`}</pre>
               <div className="vc-row"><span className="vc-label">Output</span><span className="vc-val">structured context</span></div>
               <div className="vc-row"><span className="vc-label">Latency</span><span className="vc-val green">~400ms</span></div>
             </div>
-          </div>
+            <div className="mock-overlay" style={{ marginTop: '1rem' }}>
+              <div className="mo-bar">
+                <div className="mo-dot" /><span className="mo-title">Vision output</span>
+                <span className="mo-key">structured</span>
+              </div>
+              <div className="mo-json">
+                <span className="mo-brace">{'{'}</span>{'\n'}
+                {'  '}<span className="mo-key-j">"app"</span>:{' '}
+                <span className="mo-str">"VS Code"</span>,{'\n'}
+                {'  '}<span className="mo-key-j">"context"</span>:{' '}
+                <span className="mo-str">"TypeScript error"</span>,{'\n'}
+                {'  '}<span className="mo-key-j">"intent"</span>:{' '}
+                <span className="mo-str">"debug"</span>,{'\n'}
+                {'  '}<span className="mo-key-j">"extract"</span>:{' '}
+                <span className="mo-str">"Cannot read property..."</span>{'\n'}
+                <span className="mo-brace">{'}'}</span>
+              </div>
+            </div>
+          </motion.div>
         </div>
       </section>
 
+      {/* ── STAGE 4: STREAMED RESPONSE ── */}
       <section className="hiw-section">
-        <div className="s-label">Stage 4</div>
-        <h2 className="sh">STREAMED <span>RESPONSE.</span></h2>
+        <motion.div className="s-label" variants={fadeUp} initial="hidden" whileInView="show" viewport={vp}>
+          Stage 4
+        </motion.div>
+        <motion.h2 className="sh" variants={fadeUp} initial="hidden" whileInView="show" viewport={vp}>
+          STREAMED <span>RESPONSE.</span>
+        </motion.h2>
+
         <div className="detail-grid">
-          <div className="detail-text reveal">
+          <motion.div className="detail-text" variants={fadeUp} initial="hidden" whileInView="show" viewport={vp}>
             <p className="detail-p">
               The vision model's structured context is fed as a system prompt into
               <strong> Llama 3.3 70B Versatile</strong>, also on Groq. This is the model
@@ -209,8 +331,9 @@ for await (const chunk of stream) {
   mainWindow.webContents.send('stream-token', token)
 }`}</pre>
             </div>
-          </div>
-          <div className="detail-visual reveal">
+          </motion.div>
+
+          <motion.div variants={fadeUp} initial="hidden" whileInView="show" viewport={vp}>
             <div className="visual-card">
               <div className="vc-header">
                 <div className="vc-dot" /><span>Language Model</span>
@@ -221,16 +344,34 @@ for await (const chunk of stream) {
               <div className="vc-row"><span className="vc-label">Render</span><span className="vc-val">Markdown + code</span></div>
               <div className="vc-row"><span className="vc-label">Total E2E</span><span className="vc-val green">&lt; 2 seconds</span></div>
             </div>
-          </div>
+            <div className="mock-overlay" style={{ marginTop: '1rem' }}>
+              <div className="mo-bar">
+                <div className="mo-dot" /><span className="mo-title">Token stream</span>
+                <span className="mo-key">live</span>
+              </div>
+              <div className="mo-log">
+                <div className="mo-log-line"><span className="mo-dim">t=503ms </span> LLM request sent</div>
+                <div className="mo-log-line"><span className="mo-dim">t=812ms </span> <span className="mo-green">first token → "You"</span></div>
+                <div className="mo-log-line"><span className="mo-dim">t=819ms </span> <span className="mo-green">token → "'re calling"</span></div>
+                <div className="mo-log-line"><span className="mo-dim">t=...</span>{'  '}<span className="mo-blink">▌</span></div>
+              </div>
+            </div>
+          </motion.div>
         </div>
       </section>
 
       {/* ── TIMING BREAKDOWN ── */}
       <section className="hiw-section alt-bg">
-        <div className="s-label">Performance</div>
-        <h2 className="sh">THE <span>2 SECONDS.</span></h2>
-        <p className="section-intro reveal">Every millisecond accounted for — here's the full end-to-end timing breakdown.</p>
-        <div className="timing-table reveal">
+        <motion.div className="s-label" variants={fadeUp} initial="hidden" whileInView="show" viewport={vp}>
+          Performance
+        </motion.div>
+        <motion.h2 className="sh" variants={fadeUp} initial="hidden" whileInView="show" viewport={vp}>
+          THE <span>2 SECONDS.</span>
+        </motion.h2>
+        <motion.p className="section-intro" variants={fadeUp} initial="hidden" whileInView="show" viewport={vp}>
+          Every millisecond accounted for — here's the full end-to-end timing breakdown.
+        </motion.p>
+        <motion.div className="timing-table" variants={fadeUp} initial="hidden" whileInView="show" viewport={vp}>
           {timing.map((row, i) => (
             <div key={i} className="timing-row">
               <div className="timing-stage">{row.stage}</div>
@@ -244,29 +385,33 @@ for await (const chunk of stream) {
             <span>Total end-to-end</span>
             <span className="green">~1,700ms</span>
           </div>
-        </div>
+        </motion.div>
       </section>
 
       {/* ── PRIVACY ── */}
       <section className="hiw-section">
-        <div className="s-label">Privacy</div>
-        <h2 className="sh">YOUR SCREEN.<br /><span>YOUR DATA.</span></h2>
-        <div className="privacy-grid">
+        <motion.div className="s-label" variants={fadeUp} initial="hidden" whileInView="show" viewport={vp}>
+          Privacy
+        </motion.div>
+        <motion.h2 className="sh" variants={fadeUp} initial="hidden" whileInView="show" viewport={vp}>
+          YOUR SCREEN.<br /><span>YOUR DATA.</span>
+        </motion.h2>
+        <motion.div className="privacy-grid" variants={stagger} initial="hidden" whileInView="show" viewport={vp}>
           {privacy.map((item, i) => (
-            <div key={i} className="privacy-card reveal">
+            <motion.div key={i} className="privacy-card" custom={i} variants={fadeUpItem}>
               <div className="privacy-icon">{item.icon}</div>
               <div className="privacy-title">{item.title}</div>
               <div className="privacy-desc">{item.desc}</div>
-            </div>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       </section>
 
     </main>
   )
 }
 
-/* ── DATA ── */
+/* ── Data ─────────────────────────────────────────────────────────────────── */
 
 const pipeline = [
   {
@@ -314,7 +459,7 @@ const privacy = [
   {
     icon: '🌐',
     title: 'API calls only',
-    desc: 'The only data that leaves your machine is the base64 screenshot sent to Groq\'s API over HTTPS.',
+    desc: "The only data that leaves your machine is the base64 screenshot sent to Groq's API over HTTPS.",
   },
   {
     icon: '🗑️',

@@ -1,20 +1,23 @@
 import { useState } from 'react'
 import { Nav } from './components/Nav'
 import { Hero } from './components/Hero'
-// import { HowItWorks } from './components/HowItWorks'
 import { Modes } from './components/Modes'
 import { TechStack } from './components/TechStack'
 import { Team } from './components/Team'
 import { Footer } from './components/Footer'
 import { HowItWorksPage } from './pages/HowItWorksPage'
 import { FeaturesPage } from './pages/FeaturesPage'
+import { InstallationPage } from './pages/Installationpage'
+import { TechStackPage } from './pages/Techstackpage'
 import { useTheme } from './hooks/useTheme'
 import { useScrollReveal } from './hooks/useScrollReveal'
 
 export default function App() {
   const { theme, toggleTheme } = useTheme()
   const [currentPage, setCurrentPage] = useState('home')
-  useScrollReveal()
+
+  // Pass currentPage so the observer re-attaches after every navigation
+  useScrollReveal(currentPage)
 
   const handleNavigate = (page: string) => {
     setCurrentPage(page)
@@ -34,8 +37,6 @@ export default function App() {
         <>
           <Hero />
           <hr className="divider" />
-          {/* <HowItWorks />
-          <hr className="divider" /> */}
           <Modes />
           <hr className="divider" />
           <TechStack />
@@ -44,32 +45,56 @@ export default function App() {
         </>
       )}
 
-      {currentPage === 'how-it-works' && <HowItWorksPage />}
-      {currentPage === 'features'     && <FeaturesPage />}
+      {currentPage === 'how-it-works' && (
+        <PageWithBack onNavigate={handleNavigate}>
+          <HowItWorksPage />
+        </PageWithBack>
+      )}
+
+      {currentPage === 'features' && (
+        <PageWithBack onNavigate={handleNavigate}>
+          <FeaturesPage />
+        </PageWithBack>
+      )}
 
       {currentPage === 'installation' && (
-        <main className="page">
-          <section className="page-hero">
-            <div className="page-hero-inner">
-              <div className="s-label">Coming next</div>
-              <h1 className="page-title">INSTALLATION.<br /><span className="hl-green">SOON.</span></h1>
-            </div>
-          </section>
-        </main>
+        <PageWithBack onNavigate={handleNavigate}>
+          <InstallationPage />
+        </PageWithBack>
       )}
 
       {currentPage === 'tech-stack' && (
-        <main className="page">
-          <section className="page-hero">
-            <div className="page-hero-inner">
-              <div className="s-label">Coming next</div>
-              <h1 className="page-title">TECH STACK.<br /><span className="hl-green">SOON.</span></h1>
-            </div>
-          </section>
-        </main>
+        <PageWithBack onNavigate={handleNavigate}>
+          <TechStackPage />
+        </PageWithBack>
       )}
 
       <Footer />
     </div>
+  )
+}
+
+/* ── Back-to-home wrapper ── */
+function PageWithBack({
+  children,
+  onNavigate,
+}: {
+  children: React.ReactNode
+  onNavigate: (page: string) => void
+}) {
+  return (
+    <>
+      <div className="back-bar">
+        <button
+          className="back-btn"
+          onClick={() => onNavigate('home')}
+          aria-label="Back to home"
+        >
+          <span className="back-arrow">←</span>
+          <span>Back to home</span>
+        </button>
+      </div>
+      {children}
+    </>
   )
 }
