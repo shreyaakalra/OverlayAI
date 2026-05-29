@@ -39,6 +39,9 @@ export default function App() {
           <hr className="divider" />
           <Modes />
           <hr className="divider" />
+          <TechStack />
+          <hr className="divider" />
+          <Team />
         </>
       )}
 

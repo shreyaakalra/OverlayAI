@@ -26,44 +26,20 @@
 }
 
 [data-theme="light"] {
-  --black:     #fafaf8;
-  --black-2:   #f3f3f0;
-  --black-3:   #eaeae6;
-  --black-4:   #ddddd8;
-  --green:     #1a6e3c;
-  --green-dim: #155c31;
-  --green-2:   rgba(26,110,60,0.08);
-  --green-3:   rgba(26,110,60,0.05);
-  --green-4:   rgba(26,110,60,0.02);
-  --border:    rgba(26,110,60,0.1);
-  --border-hi: rgba(26,110,60,0.25);
-  --text:      #111210;
-  --text-2:    rgba(17,18,16,0.58);
-  --text-3:    rgba(17,18,16,0.32);
-}
-
-[data-theme="light"] .nav-cta,
-[data-theme="light"] .dl-btn {
-  color: #fff;
-}
-
-[data-theme="light"] .nav-link {
-  color: rgba(255,255,255,0.7);
-}
-
-[data-theme="light"] .nav-link:hover,
-[data-theme="light"] .nav-link-active {
-  color: #fff;
-}
-
-[data-theme="light"] .logo-name,
-[data-theme="light"] .theme-btn {
-  color: #fff;
-}
-
-[data-theme="light"] nav {
-  background: rgba(26,110,60,0.92);
-  border-bottom-color: rgba(255,255,255,0.15);
+  --black:     #f5f5f5;
+  --black-2:   #ececec;
+  --black-3:   #e0e0e0;
+  --black-4:   #d4d4d4;
+  --green:     #008f24;
+  --green-dim: #006b1b;
+  --green-2:   rgba(0,143,36,0.1);
+  --green-3:   rgba(0,143,36,0.05);
+  --green-4:   rgba(0,143,36,0.02);
+  --border:    rgba(0,143,36,0.15);
+  --border-hi: rgba(0,143,36,0.35);
+  --text:      #0a0a0a;
+  --text-2:    rgba(10,10,10,0.55);
+  --text-3:    rgba(10,10,10,0.28);
 }
 
 html { scroll-behavior: smooth; }
