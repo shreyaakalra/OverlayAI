@@ -8,7 +8,12 @@
   box-sizing: border-box;
 }
 
-body {
+/* Transparent so live mode (small floating chat box) shows the real screen around it */
+html,
+body,
+#root {
+  height: 100%;
+  overflow: hidden;
   background: transparent;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
